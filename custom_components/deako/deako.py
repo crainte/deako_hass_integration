@@ -61,7 +61,7 @@ class ConnectionThread(Thread):
         # this.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
         # this.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
         # this.s.settimeout(2)
-        await self.loop.sock_connect(self.socket, self.address)
+        await self.loop.sock_connect(self.socket, (self.address,))
 
     async def close_socket(self):
         if self.socket is not None:
