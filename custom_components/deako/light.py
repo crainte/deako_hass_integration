@@ -40,6 +40,7 @@ class DeakoLightSwitch(LightEntity):
             },
             "uuid": self.name,
             "manufacturer": "Deako",
+            "model": "dimmer switch" if self.supported_features == SUPPORT_BRIGHTNESS else "smart switch"
         }
 
     @property
