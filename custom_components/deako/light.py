@@ -12,13 +12,13 @@ from homeassistant.components.light import (
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
+async def async_setup_entry(hass, entry, async_add_entities):
     """Configure the platform."""
     client = hass.data[DOMAIN][entry.entry_id]
 
     devices = client.get_devices()
-    for uuid in devices:
-        async_add_devices([DeakoLightSwitch(client, uuid)])
+    lights = [DeakoLightSwitch(client, uuid) for uuid in devices]
+    async_add_entities(lights, True)
 
 
 class DeakoLightSwitch(LightEntity):
@@ -31,6 +31,16 @@ class DeakoLightSwitch(LightEntity):
 
     def on_update(self):
         self.schedule_update_ha_state()
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {
+                (DOMAIN, self.uuid)
+            },
+            "uuid": self.name,
+            "manufacturer": "Deako",
+        }
 
     @property
     def unique_id(self):
