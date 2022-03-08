@@ -88,6 +88,7 @@ class ConnectionThread(Thread):
                 try:
                     await self.connect_socket()
                     self.state = 1
+                    _LOGGER.info("connected to deako local integrations")
                 except Exception as e:
                     _LOGGER.error(f"Failed to connect to {self.address} because {e}")
                     self.state = 2

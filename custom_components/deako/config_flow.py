@@ -1,4 +1,6 @@
 """Config flow for deako."""
+import logging
+
 from homeassistant.components import zeroconf
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_entry_flow
@@ -6,6 +8,8 @@ from homeassistant.helpers import config_entry_flow
 from .const import DOMAIN
 from .deako import Deako
 from .discover import DeakoDiscoverer, DevicesNotFoundExecption
+
+_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 async def _async_has_devices(hass: HomeAssistant) -> bool:
@@ -15,10 +19,16 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
 
     try:
         address = await discoverer.get_address()
+
+        _LOGGER.info(f"got address {address}, connecting to find devices")
         deako = Deako(address, "Home Assistant")
         await deako.connect()
-        await deako.find_devices(timeout=5)
+
+        _LOGGER.info("connected, finding devices")
+        await deako.find_devices(timeout=10)
+
         devices = deako.get_devices()
+        _LOGGER.info(f"found {len(devices)} devices")
         await deako.disconnect()  # TODO: reuse this connection
         return len(devices) > 0
 
