@@ -14,6 +14,9 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 async def _async_has_devices(hass: HomeAssistant) -> bool:
     """Return if there are devices that can be discovered."""
+    if hass.data.get(DOMAIN) is None:
+        hass.data.setdefault(DOMAIN, {})
+
     zc = await zeroconf.async_get_instance(hass)
     discoverer = DeakoDiscoverer(zc)
 
