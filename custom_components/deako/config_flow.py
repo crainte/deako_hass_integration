@@ -36,7 +36,7 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
         _LOGGER.info(f"found {len(devices)} devices")
 
         _LOGGER.info("setting connection for future use")
-        hass.data.get(DOMAIN).set(CONNECTION_ID, deako)
+        hass.data[DOMAIN][CONNECTION_ID] = deako
         _LOGGER.info("set connection for future use")
 
         return len(devices) > 0
