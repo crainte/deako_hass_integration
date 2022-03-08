@@ -89,14 +89,15 @@ class ConnectionThread(Thread):
                 try:
                     await self.connect_socket()
                     self.state = 1
-                except:
-                    _LOGGER.error("Failed to connect")
+                except Exception as e:
+                    _LOGGER.error(f"Failed to connect to {self.ip} because {e}")
                     self.state = 2
                     continue
             elif self.state == 1:
                 try:
                     await self.read_socket()
-                except:
+                except Exception as e:
+                    _LOGGER.error(f"Failed to read socket to {self.ip} because {e}")
                     self.state = 2
                     continue
             elif self.state == 2:
@@ -104,7 +105,8 @@ class ConnectionThread(Thread):
                     await self.close_socket()
                     self.state = 0
                     await asyncio.sleep(5)
-                except:
+                except Exception as e:
+                    _LOGGER.error(f"Failed to close socket to {self.ip} because {e}")
                     self.state = 2
                     continue
             else:

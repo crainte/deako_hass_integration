@@ -1,6 +1,4 @@
 """Config flow for deako."""
-# import my_pypi_dependency
-
 from homeassistant.components import zeroconf
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_entry_flow
