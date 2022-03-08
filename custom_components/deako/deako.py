@@ -85,6 +85,7 @@ class ConnectionThread(Thread):
             await asyncio.sleep(1)
 
     async def _run(self):
+        attempts = 0
         while True:
             if self.state == 0:
                 try:
@@ -93,11 +94,19 @@ class ConnectionThread(Thread):
                     _LOGGER.info("connected to deako local integrations")
                 except Exception as e:
                     _LOGGER.error(f"Failed to connect to {self.address} because {e}")
+                    attempts += 1
+                    if attempts == 5:
+                        try:
+                            await self.close_socket()
+                        finally:
+                            return
                     self.state = 2
                     continue
             elif self.state == 1:
                 try:
                     await self.read_socket()
+                    if attempts > 0:
+                        attempts -= 1
                 except Exception as e:
                     _LOGGER.error(f"Failed to read socket to {self.address} because {e}")
                     self.state = 2
@@ -106,6 +115,8 @@ class ConnectionThread(Thread):
                 try:
                     await self.close_socket()
                     self.state = 0
+                    if attempts > 0:
+                        attempts -= 1
                     await asyncio.sleep(5)
                 except Exception as e:
                     _LOGGER.error(f"Failed to close socket to {self.address} because {e}")
