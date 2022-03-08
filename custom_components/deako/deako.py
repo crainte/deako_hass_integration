@@ -247,6 +247,7 @@ class Deako:
         )
 
     def get_name_for_device(self, uuid):
+        _LOGGER.info(f"{self.devices[uuid]}")
         return self.devices[uuid]["name"]
 
     def get_state_for_device(self, uuid):
