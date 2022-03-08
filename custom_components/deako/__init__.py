@@ -1,43 +1,39 @@
-"""
-Custom integration to integrate Deako with Home Assistant.
+"""The deako integration."""
+from __future__ import annotations
 
-For more details about this integration, please refer to
-https://github.com/custom-components/integration_blueprint
-"""
-import asyncio
-from datetime import timedelta
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import Config, HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+from homeassistant.components import zeroconf
+
+from .const import DOMAIN
 
 from .deako import Deako
-
-from .const import (
-    CONF_IP,
-    DOMAIN,
-    PLATFORMS,
-    STARTUP_MESSAGE,
-)
+from .discover import DeakoDiscoverer, DevicesNotFoundExecption
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
-async def async_setup(hass: HomeAssistant, config: Config):
-    """Set up this integration using YAML is not supported."""
-    return True
+PLATFORMS: list[Platform] = [Platform.LIGHT]
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Set up this integration using UI."""
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up deako from a config entry."""
+
     if hass.data.get(DOMAIN) is None:
         hass.data.setdefault(DOMAIN, {})
-        _LOGGER.info(STARTUP_MESSAGE)
 
-    ip = entry.data.get(CONF_IP)
+    zc = await zeroconf.async_get_instance(hass)
+    deako_discoverer = DeakoDiscoverer(zc)
 
-    connection = Deako(ip, "Home Assistant")
+    try:
+        address = await deako_discoverer.get_address()
+    except DevicesNotFoundExecption:
+        _LOGGER.error("No devices found, setup failed")
+        return False
+
+    connection = Deako(address, "Home Assistant")
     await connection.connect()
     await connection.find_devices()
 
@@ -45,33 +41,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     for platform in PLATFORMS:
         if entry.options.get(platform, True):
-            hass.async_add_job(
+            await hass.async_add_job(
                 hass.config_entries.async_forward_entry_setup(entry, platform)
             )
 
-    entry.add_update_listener(async_reload_entry)
+    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    unloaded = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-                if platform in coordinator.platforms
-            ]
-        )
-    )
-    if unloaded:
+    """Unload a config entry."""
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    return unloaded
-
-
-async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload config entry."""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+    return unload_ok

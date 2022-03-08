@@ -1,7 +1,4 @@
-from threading import Timer
 import socket
-import select
-import threading
 import json
 import asyncio
 import logging
@@ -202,6 +199,9 @@ class Deako:
         self.connection.connect(self.ip, 23)
         self.connection.start()
         await self.connection.wait_for_connect()
+
+    async def disconnect(self):
+        await self.connection.close_socket()
 
     def get_devices(self):
         return self.devices
