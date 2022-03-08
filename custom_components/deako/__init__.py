@@ -8,7 +8,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.components import zeroconf
 
-from .const import DOMAIN
+from .const import CONNECTION_ID, DOMAIN
 
 from .deako import Deako
 from .discover import DeakoDiscoverer, DevicesNotFoundExecption
@@ -28,11 +28,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     deako_discoverer = DeakoDiscoverer(zc)
 
     try:
-        connection = hass.data[DOMAIN][entry.entry_id]
+        connection = hass.data[DOMAIN][CONNECTION_ID]
+        _LOGGER.info("found prev connection from setup")
     except DevicesNotFoundExecption:
         _LOGGER.error("No devices found, setup failed")
         return False
     except KeyError:
+        _LOGGER.info(f"didn't find connection in data: {hass.data.get(DOMAIN)}")
         address = await deako_discoverer.get_address()
         connection = Deako(address, "Home Assistant")
         await connection.connect()
