@@ -17,6 +17,7 @@ PLATFORMS = [LIGHT]
 # Configuration and options
 CONF_ENABLED = "enabled"
 CONF_IP = "ip"
+CONNECTION_ID = "connection_id"
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------

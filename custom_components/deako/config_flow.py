@@ -5,7 +5,7 @@ from homeassistant.components import zeroconf
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_entry_flow
 
-from .const import DOMAIN
+from .const import CONNECTION_ID, DOMAIN
 from .deako import Deako
 from .discover import DeakoDiscoverer, DevicesNotFoundExecption
 
@@ -29,7 +29,8 @@ async def _async_has_devices(hass: HomeAssistant) -> bool:
 
         devices = deako.get_devices()
         _LOGGER.info(f"found {len(devices)} devices")
-        await deako.disconnect()  # TODO: reuse this connection
+
+        hass.data[DOMAIN][CONNECTION_ID] = deako
         return len(devices) > 0
 
     except DevicesNotFoundExecption:

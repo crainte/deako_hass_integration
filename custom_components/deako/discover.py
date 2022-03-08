@@ -16,7 +16,7 @@ class DevicesNotFoundExecption(Exception):
 
 
 class DeakoDiscoverer(ServiceBrowser):
-    addresses = []
+    addresses = set()  # for uniqueness
     done = False
 
     def __init__(self, zeroconf: Zeroconf) -> None:
@@ -26,7 +26,7 @@ class DeakoDiscoverer(ServiceBrowser):
         )
 
     def device_address_callback(self, address: str):
-        self.addresses.append(address)
+        self.addresses.add(address)
         _LOGGER.info(f"discovered device at {address}")
 
     async def get_address(self):
@@ -37,7 +37,8 @@ class DeakoDiscoverer(ServiceBrowser):
             await sleep(0.1)
         if len(self.addresses) == 0:
             raise DevicesNotFoundExecption()
-        address = self.addresses[0]
+        address = self.addresses.pop()
+        self.addresses.add(address)  # don't actually want this gone
         _LOGGER.info(f"Found device at {address}")
         return address
 

@@ -28,14 +28,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     deako_discoverer = DeakoDiscoverer(zc)
 
     try:
-        address = await deako_discoverer.get_address()
+        connection = hass.data[DOMAIN][entry.entry_id]
     except DevicesNotFoundExecption:
         _LOGGER.error("No devices found, setup failed")
         return False
-
-    connection = Deako(address, "Home Assistant")
-    await connection.connect()
-    await connection.find_devices()
+    except KeyError:
+        address = await deako_discoverer.get_address()
+        connection = Deako(address, "Home Assistant")
+        await connection.connect()
+        await connection.find_devices()
 
     hass.data[DOMAIN][entry.entry_id] = connection
 
