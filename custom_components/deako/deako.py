@@ -27,9 +27,8 @@ class ConnectionThread(Thread):
         self.on_data_callback = on_data_callback
         # self.error_callback = error_callback
 
-    def connect(self, ip, port):
-        self.ip = ip
-        self.port = port
+    def connect(self, address):
+        self.address = address
 
     async def send_data(self, data_to_send):
         if self.socket is None:
@@ -62,7 +61,7 @@ class ConnectionThread(Thread):
         # this.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
         # this.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
         # this.s.settimeout(2)
-        await self.loop.sock_connect(self.socket, (self.ip, self.port))
+        await self.loop.sock_connect(self.socket, self.address)
 
     async def close_socket(self):
         if self.socket is not None:
@@ -90,14 +89,14 @@ class ConnectionThread(Thread):
                     await self.connect_socket()
                     self.state = 1
                 except Exception as e:
-                    _LOGGER.error(f"Failed to connect to {self.ip} because {e}")
+                    _LOGGER.error(f"Failed to connect to {self.address} because {e}")
                     self.state = 2
                     continue
             elif self.state == 1:
                 try:
                     await self.read_socket()
                 except Exception as e:
-                    _LOGGER.error(f"Failed to read socket to {self.ip} because {e}")
+                    _LOGGER.error(f"Failed to read socket to {self.address} because {e}")
                     self.state = 2
                     continue
             elif self.state == 2:
@@ -106,7 +105,7 @@ class ConnectionThread(Thread):
                     self.state = 0
                     await asyncio.sleep(5)
                 except Exception as e:
-                    _LOGGER.error(f"Failed to close socket to {self.ip} because {e}")
+                    _LOGGER.error(f"Failed to close socket to {self.address} because {e}")
                     self.state = 2
                     continue
             else:
@@ -128,8 +127,8 @@ async def control_device_worker(queue, callback):
 
 
 class Deako:
-    def __init__(self, ip, what):
-        self.ip = ip
+    def __init__(self, address, what):
+        self.address = address
         self.src = what
         self.connection = ConnectionThread()
         self.connection.set_callbacks(self.incoming_json)
@@ -198,7 +197,7 @@ class Deako:
         self.devices[uuid]["state"]["dim"] = dim
 
     async def connect(self):
-        self.connection.connect(self.ip, 23)
+        self.connection.connect(self.address)
         self.connection.start()
         await self.connection.wait_for_connect()
 
