@@ -17,7 +17,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     devices = client.get_devices()
     lights = [DeakoLightSwitch(client, uuid) for uuid in devices]
-    async_add_entities(lights, True)
+    try:
+        await async_add_entities(lights, True)
+    except ValueError as e:
+        _LOGGER.error(f"error setting up all lights: {e}")
 
 
 class DeakoLightSwitch(LightEntity):
