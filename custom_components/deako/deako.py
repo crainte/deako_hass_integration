@@ -93,9 +93,9 @@ class ConnectionThread(Thread):
                     self.state = 1
                     _LOGGER.info("connected to deako local integrations")
                 except Exception as e:
-                    _LOGGER.error(f"Failed to connect to {self.address} because {e}")
                     attempts += 1
-                    if attempts == 5:
+                    _LOGGER.error(f"Failed to connect to {self.address} because {e}, attempts: {attempts}")
+                    if attempts > 5:
                         try:
                             await self.close_socket()
                         finally:
