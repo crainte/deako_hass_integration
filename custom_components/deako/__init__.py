@@ -50,11 +50,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    try:
+        await hass.data[DOMAIN][entry.entry_id].disconnect()
+    except Exception as e:
+        _LOGGER.error(f"unable to disconnect prev connection thread: {e}")
+
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        try:
-            await hass.data[DOMAIN][entry.entry_id].disconnect()
-        except Exception as e:
-            _LOGGER.error(f"unable to disconnect prev connection thread: {e}")
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
