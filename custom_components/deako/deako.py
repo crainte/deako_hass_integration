@@ -175,6 +175,7 @@ class Deako:
         self.devices[uuid]["callback"] = callback
 
     def incoming_json(self, in_data):
+        _LOGGER.info(in_data)
         try:
             if in_data["type"] == "DEVICE_LIST":
                 subdata = in_data["data"]
