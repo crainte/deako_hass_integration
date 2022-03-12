@@ -216,6 +216,7 @@ class Deako:
         await self.connection.wait_for_connect()
 
     async def disconnect(self):
+        _LOGGER.info(f"disconnecting from {self.address}")
         await self.connection.close_socket()
 
     def get_devices(self):
