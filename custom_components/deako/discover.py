@@ -76,7 +76,10 @@ class MyListener:
             self.device_address_callback(address)
 
     def get_addresses(self, zeroconf: Zeroconf, type, name):
+        _LOGGER.info(f"getting mdns info for {type}:{name}")
         info = zeroconf.get_service_info(type, name)
-        addresses = info.addresses
-        port = info.port
-        return [f"{inet_ntoa(address)}:{port}" for address in addresses]
+        if info is not None:
+            addresses = info.addresses
+            port = info.port
+            return [f"{inet_ntoa(address)}:{port}" for address in addresses]
+        return []
