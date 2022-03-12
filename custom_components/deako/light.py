@@ -2,7 +2,6 @@
 from .const import (
     DOMAIN,
 )
-from homeassistant.components.binary_sensor import BinarySensorEntity
 
 import logging
 
@@ -38,7 +37,8 @@ class DeakoLightSwitch(LightEntity):
             "identifiers": {
                 (DOMAIN, self.uuid)
             },
-            "uuid": self.name,
+            "name": self.name,
+            "uuid": self.uuid,
             "manufacturer": "Deako",
             "model": "dimmer" if self.supported_features == SUPPORT_BRIGHTNESS else "smart"
         }
