@@ -34,8 +34,8 @@ class DeakoDiscoverer(ServiceBrowser):
         self.addresses.add(address)
 
     def device_address_removed_callback(self, address: str):
-        _LOGGER.info(f"removing address {address} to set of available devices")
-        self.addresses.pop(address)
+        _LOGGER.info(f"removing address {address} from set of available devices")
+        self.addresses.pop()
 
     async def get_address(self):
         _LOGGER.info("getting address for deako")
