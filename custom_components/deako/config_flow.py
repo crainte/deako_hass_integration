@@ -1,45 +1,30 @@
 """Config flow for deako."""
-import logging
+# import my_pypi_dependency
 
 from homeassistant.components import zeroconf
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_entry_flow
 
-from .const import CONNECTION_ID, DOMAIN
-from .deako import Deako
+from .const import DISCOVERER_ID, DOMAIN
 from .discover import DeakoDiscoverer, DevicesNotFoundExecption
-
-_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 async def _async_has_devices(hass: HomeAssistant) -> bool:
     """Return if there are devices that can be discovered."""
-    if hass.data.get(DOMAIN) is None:
-        hass.data.setdefault(DOMAIN, {
-            "key": "value"
-        })
-
     zc = await zeroconf.async_get_instance(hass)
     discoverer = DeakoDiscoverer(zc)
 
+    if hass.data.get(DOMAIN) is None:
+        hass.data.setdefault(DOMAIN, {
+            DISCOVERER_ID: discoverer,
+        })
+    else:
+        hass.data[DISCOVERER_ID] = discoverer
+
     try:
-        address = await discoverer.get_address()
-
-        _LOGGER.info(f"got address {address}, connecting to find devices")
-        deako = Deako(address, "Home Assistant")
-        await deako.connect()
-
-        _LOGGER.info("connected, finding devices")
-        await deako.find_devices(timeout=10)
-
-        devices = deako.get_devices()
-        _LOGGER.info(f"found {len(devices)} devices")
-
-        _LOGGER.info("setting connection for future use")
-        hass.data[DOMAIN][CONNECTION_ID] = deako
-        _LOGGER.info("set connection for future use")
-
-        return len(devices) > 0
+        await discoverer.get_address()
+        # address exists, there's at least one device
+        return True
 
     except DevicesNotFoundExecption:
         return False

@@ -18,6 +18,7 @@ PLATFORMS = [LIGHT]
 CONF_ENABLED = "enabled"
 CONF_IP = "ip"
 CONNECTION_ID = "connection_id"
+DISCOVERER_ID = "discoverer_id"
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
