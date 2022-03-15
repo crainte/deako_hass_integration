@@ -67,9 +67,6 @@ class MyListener:
         for address in addresses:
             self.device_address_removed_callback(address)
 
-    def update_service(self, _zeroconf, _type, name):
-        print(f"service {name} update")
-
     def add_service(self, zeroconf: Zeroconf, type, name):
         addresses = self.get_addresses(zeroconf, type, name)
         for address in addresses:
