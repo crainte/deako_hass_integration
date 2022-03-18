@@ -25,7 +25,7 @@ class ConnectionThread(Thread):
     def __init__(self, on_data_callback, get_new_address):
         self.on_data_callback = on_data_callback
         self.get_new_address = get_new_address
-        super()
+        super().__init__()
 
     def connect(self, address):
         self.address = address
