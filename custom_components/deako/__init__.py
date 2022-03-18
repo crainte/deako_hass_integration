@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         deako_discoverer = DeakoDiscoverer(zc)
 
     address = await deako_discoverer.get_address()
-    connection = Deako(address, "Home Assistant")
+    connection = Deako(address, "Home Assistant", deako_discoverer.get_next_address)
     await connection.connect()
     await connection.find_devices()
 

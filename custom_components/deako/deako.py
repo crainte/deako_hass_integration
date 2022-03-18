@@ -22,10 +22,10 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 class ConnectionThread(Thread):
-    def set_callbacks(self, on_data_callback):
-        # self.connect_callback = connect_callback
+    def __init__(self, on_data_callback, get_new_address):
         self.on_data_callback = on_data_callback
-        # self.error_callback = error_callback
+        self.get_new_address = get_new_address
+        super()
 
     def connect(self, address):
         self.address = address
@@ -36,7 +36,8 @@ class ConnectionThread(Thread):
 
         try:
             await self.loop.sock_sendall(self.socket, str.encode(data_to_send))
-        except:
+        except Exception as e:
+            _LOGGER.error(f"error sending data: {e}")
             self.has_send_error = True
 
     async def read_socket(self):
@@ -85,7 +86,6 @@ class ConnectionThread(Thread):
             await asyncio.sleep(1)
 
     async def _run(self):
-        attempts = 0
         while True:
             if self.state == 0:
                 try:
@@ -93,20 +93,12 @@ class ConnectionThread(Thread):
                     self.state = 1
                     _LOGGER.info("connected to deako local integrations")
                 except Exception as e:
-                    attempts = attempts + 1
-                    _LOGGER.error(f"Failed to connect to {self.address} because {e}, attempts: {attempts}")
-                    if attempts > 5:
-                        try:
-                            await self.close_socket()
-                        finally:
-                            return
+                    _LOGGER.error(f"Failed to connect to {self.address} because {e}")
                     self.state = 2
                     continue
             elif self.state == 1:
                 try:
                     await self.read_socket()
-                    if attempts > 0:
-                        attempts = attempts - 1
                 except Exception as e:
                     _LOGGER.error(f"Failed to read socket to {self.address} because {e}")
                     self.state = 2
@@ -115,9 +107,12 @@ class ConnectionThread(Thread):
                 try:
                     await self.close_socket()
                     self.state = 0
-                    if attempts > 0:
-                        attempts = attempts - 1
                     await asyncio.sleep(5)
+                    # get a new address since the last one gave us issues
+                    self.address = self.get_new_address(self.address)
+                except KeyError:
+                    _LOGGER.error("no addresses")
+                    return  # if we have no addresses, there's not much we can do
                 except Exception as e:
                     _LOGGER.error(f"Failed to close socket to {self.address} because {e}")
                     self.state = 2
@@ -141,11 +136,10 @@ async def control_device_worker(queue, callback):
 
 
 class Deako:
-    def __init__(self, address, what):
+    def __init__(self, address, what, get_new_address):
         self.address = address
         self.src = what
-        self.connection = ConnectionThread()
-        self.connection.set_callbacks(self.incoming_json)
+        self.connection = ConnectionThread(self.incoming_json, get_new_address)
 
         self.devices = {}
         self.expected_devices = 0

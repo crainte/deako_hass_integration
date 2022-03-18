@@ -51,6 +51,11 @@ class DeakoDiscoverer(ServiceBrowser):
         _LOGGER.info(f"Found device at {address}")
         return address
 
+    def get_next_address(self, old_address):  # getting another address means we have issues with the old one
+        if old_address is not None:
+            self.addresses.remove(old_address)
+        return self.addresses.pop()
+
     def stop(self):
         self.zeroconf.close()
 
