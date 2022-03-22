@@ -108,15 +108,15 @@ class ConnectionThread(Thread):
                     await self.close_socket()
                     self.state = 0
                     await asyncio.sleep(5)
-                    # get a new address since the last one gave us issues
-                    self.address = self.get_new_address(self.address)
-                except KeyError:
-                    _LOGGER.error("no addresses")
-                    return  # if we have no addresses, there's not much we can do
+                    self.state = 3
                 except Exception as e:
                     _LOGGER.error(f"Failed to close socket to {self.address} because {e}")
                     self.state = 2
                     continue
+            elif self.state == 3:
+                # get a new address since the last one gave us issues
+                self.address = await self.get_new_address(self.address)
+                self.state = 0
             else:
                 _LOGGER.error("Unknown state")
 

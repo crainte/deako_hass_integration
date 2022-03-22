@@ -30,11 +30,11 @@ class DeakoDiscoverer(ServiceBrowser):
         )
 
     def device_address_callback(self, address: str):
-        _LOGGER.info(f"adding address {address} to set of available devices")
+        _LOGGER.info(f"adding address {address} to set of available devices, new list: {self.addresses}")
         self.addresses.add(address)
 
     def device_address_removed_callback(self, address: str):
-        _LOGGER.info(f"removing address {address} from set of available devices")
+        _LOGGER.info(f"removing address {address} from set of available devices, new list: {self.addresses}")
         self.addresses.pop()
 
     async def get_address(self):
@@ -51,10 +51,13 @@ class DeakoDiscoverer(ServiceBrowser):
         _LOGGER.info(f"Found device at {address}")
         return address
 
-    def get_next_address(self, old_address):  # getting another address means we have issues with the old one
+    async def get_next_address(self, old_address):  # getting another address means we have issues with the old one
         if old_address is not None:
             self.addresses.remove(old_address)
-        return self.addresses.pop()
+        try:
+            return self.addresses.pop()
+        except KeyError:
+            return await self.get_address()
 
     def stop(self):
         self.zeroconf.close()
