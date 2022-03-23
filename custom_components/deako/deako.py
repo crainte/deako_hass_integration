@@ -139,7 +139,7 @@ class Deako:
     def __init__(self, what, get_address):
         self.src = what
         self.get_address = get_address
-        self.connection = ConnectionThread(self.incoming_json)
+        self.connection = ConnectionThread(self.incoming_json, get_address)
 
         self.devices = {}
         self.expected_devices = 0
