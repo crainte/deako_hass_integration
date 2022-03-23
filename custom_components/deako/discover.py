@@ -17,7 +17,6 @@ class DevicesNotFoundExecption(Exception):
 
 class DeakoDiscoverer(ServiceBrowser):
     addresses = set()
-    done = False
 
     def __init__(self, zeroconf: Zeroconf) -> None:
         self.zeroconf = zeroconf
@@ -49,6 +48,7 @@ class DeakoDiscoverer(ServiceBrowser):
         address = self.addresses.pop()
         self.addresses.add(address)
         _LOGGER.info(f"Found device at {address}")
+        self.cancel()
         return address
 
     def stop(self):
