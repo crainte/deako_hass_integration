@@ -47,17 +47,9 @@ class DeakoDiscoverer(ServiceBrowser):
             _LOGGER.error("No devices found!")
             raise DevicesNotFoundExecption()
         address = self.addresses.pop()
-        self.addresses.add(address)  # will want to use it again
+        self.addresses.add(address)
         _LOGGER.info(f"Found device at {address}")
         return address
-
-    async def get_next_address(self, old_address):  # getting another address means we have issues with the old one
-        if old_address is not None:
-            self.addresses.remove(old_address)
-        try:
-            return self.addresses.pop()
-        except KeyError:
-            return await self.get_address()
 
     def stop(self):
         self.zeroconf.close()

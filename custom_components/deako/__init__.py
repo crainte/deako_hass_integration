@@ -24,14 +24,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if hass.data.get(DOMAIN) is None:
         hass.data.setdefault(DOMAIN, {})
 
-    try:
-        deako_discoverer = hass.data[DOMAIN][DISCOVERER_ID]
-    except KeyError:
+    async def get_address():
         zc = await zeroconf.async_get_instance(hass)
-        deako_discoverer = DeakoDiscoverer(zc)
+        discoverer = DeakoDiscoverer(zc)
+        return await discoverer.get_address()
 
-    address = await deako_discoverer.get_address()
-    connection = Deako(address, "Home Assistant", deako_discoverer.get_next_address)
+    connection = Deako("Home Assistant", get_address)
     await connection.connect()
     await connection.find_devices()
 

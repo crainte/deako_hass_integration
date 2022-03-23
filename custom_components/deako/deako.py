@@ -115,7 +115,7 @@ class ConnectionThread(Thread):
                     continue
             elif self.state == 3:
                 # get a new address since the last one gave us issues
-                self.address = await self.get_new_address(self.address)
+                self.address = await self.get_new_address()
                 self.state = 0
             else:
                 _LOGGER.error("Unknown state")
@@ -136,10 +136,10 @@ async def control_device_worker(queue, callback):
 
 
 class Deako:
-    def __init__(self, address, what, get_new_address):
-        self.address = address
+    def __init__(self, what, get_address):
         self.src = what
-        self.connection = ConnectionThread(self.incoming_json, get_new_address)
+        self.get_address = get_address
+        self.connection = ConnectionThread(self.incoming_json)
 
         self.devices = {}
         self.expected_devices = 0
@@ -205,6 +205,7 @@ class Deako:
         self.devices[uuid]["state"]["dim"] = dim
 
     async def connect(self):
+        self.address = await self.get_address()
         self.connection.connect(self.address)
         self.connection.start()
         await self.connection.wait_for_connect()
