@@ -6,7 +6,7 @@ from socket import inet_ntoa
 
 
 DEAKO_TYPE = "_deako._tcp.local."
-TIMEOUT_S = 3
+TIMEOUT_S = 10
 
 _LOGGER = logging.getLogger(__name__)
 
