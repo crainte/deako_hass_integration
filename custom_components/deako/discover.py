@@ -72,6 +72,9 @@ class MyListener:
         for address in addresses:
             self.device_address_callback(address)
 
+    def update_service(self, zeroconf, type, name):
+        pass  # suppress warnings
+
     def get_addresses(self, zeroconf: Zeroconf, type, name):
         _LOGGER.info(f"getting mdns info for {type}:{name}")
         info = zeroconf.get_service_info(type, name)
