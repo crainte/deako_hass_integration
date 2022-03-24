@@ -57,11 +57,6 @@ class ConnectionThread(Thread):
 
     async def connect_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
-        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
-        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
-        self.socket.settimeout(10)
         _LOGGER.info(f"connecting to {self.address}")
         [address, port] = self.address.split(":")
         await self.loop.sock_connect(self.socket, (address, port))
