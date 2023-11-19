@@ -1,11 +1,11 @@
 """Constants for Deako."""
 # Base component constants
-NAME = "Deako"
-DOMAIN = "deako"
+NAME = "Deako (Dev)"
+DOMAIN = "dko"
 DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.0.1"
-ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
-ISSUE_URL = "https://github.com/custom-components/integration_blueprint/issues"
+ATTRIBUTION = "Based on Balake & sebirdman's work"
+ISSUE_URL = "https://github.com/crainte/deako_hass_integration"
 
 # Icons
 ICON = "mdi:format-quote-close"
